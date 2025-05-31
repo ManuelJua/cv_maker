@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Adapter - Tailor Your CV to Job Descriptions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CV Adapter</h1>
+            <p>Adapt your CV to match job descriptions automatically</p>
+        </header>
+
+        <main>
+            <section class="upload-section">
+                <div class="input-group">
+                    <label for="cv-file">Upload your CV (PDF or TXT)</label>
+                    <input type="file" id="cv-file" accept=".pdf,.txt" required>
+                    <span class="file-info"></span>
+                </div>
+
+                <div class="input-group">
+                    <label for="job-url">Job Description URL (LinkedIn, Indeed, Reed)</label>
+                    <input type="url" id="job-url" placeholder="https://..." required>
+                </div>
+
+                <button id="adapt-btn" class="btn-primary">Adapt CV</button>
+            </section>
+
+            <section class="loading-section" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing your CV adaptation...</p>
+            </section>
+
+            <section class="results-section" style="display: none;">
+                <div class="results-header">
+                    <h2>Results</h2>
+                    <button id="download-btn" class="btn-secondary">Download CV</button>
+                </div>
+                
+                <div class="results-container">
+                    <div class="job-description-section">
+                        <h3>Extracted Job Description</h3>
+                        <div class="job-description-preview" id="job-description-content">
+                            <!-- Job description content will be displayed here -->
+                        </div>
+                    </div>
+                    
+                    <div class="adapted-cv-section">
+                        <h3>Adapted CV</h3>
+                        <div class="cv-preview" id="cv-content">
+                            <!-- Adapted CV content will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
