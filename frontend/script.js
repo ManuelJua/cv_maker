@@ -110,8 +110,20 @@ class CVAdapter {
         const cvContent = document.getElementById('cv-content');
         const jobDescriptionContent = document.getElementById('job-description-content');
         
-        // Display the adapted CV
+        // Display the adapted CV and make it editable
         cvContent.innerHTML = this.markdownToHtml(result.adapted_cv);
+        cvContent.contentEditable = true;
+        cvContent.setAttribute('spellcheck', 'true');
+        
+        // Add visual feedback for editable content
+        cvContent.style.border = '1px dashed #ccc';
+        cvContent.style.padding = '10px';
+        cvContent.style.minHeight = '300px';
+        
+        // Add event listener to update currentAdaptedCV when content changes
+        cvContent.addEventListener('input', () => {
+            this.currentAdaptedCV = this.htmlToMarkdown(cvContent.innerHTML);
+        });
         
         // Display the extracted job description
         if (result.job_description) {
@@ -180,6 +192,20 @@ class CVAdapter {
             .replace(/^\* (.*$)/gim, '<li>$1</li>')
             .replace(/(<li>.*<\/li>)/gims, '<ul>$1</ul>')
             .replace(/\n/gim, '<br>');
+    }
+
+    htmlToMarkdown(html) {
+        // Simple HTML to markdown conversion
+        return html
+            .replace(/<h1>(.*?)<\/h1>/gim, '# $1')
+            .replace(/<h2>(.*?)<\/h2>/gim, '## $1')
+            .replace(/<h3>(.*?)<\/h3>/gim, '### $1')
+            .replace(/<strong>(.*?)<\/strong>/gim, '**$1**')
+            .replace(/<em>(.*?)<\/em>/gim, '*$1*')
+            .replace(/<ul>(.*?)<\/ul>/gims, '$1')
+            .replace(/<li>(.*?)<\/li>/gim, '* $1')
+            .replace(/<br>/gim, '\n')
+            .replace(/<\/?p>/gim, '');
     }
 
     handleDownload() {
