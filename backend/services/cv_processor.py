@@ -1,5 +1,5 @@
 from fastapi import UploadFile
-import PyPDF2
+import pypdf
 import io
 import logging
 from typing import Optional
@@ -40,7 +40,7 @@ class CVProcessor:
         """Extract text from PDF file content."""
         try:
             pdf_file = io.BytesIO(content)
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            pdf_reader = pypdf.PdfReader(pdf_file)
             
             text = ""
             for page in pdf_reader.pages:

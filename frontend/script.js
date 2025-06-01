@@ -1,6 +1,7 @@
 class CVAdapter {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:8000/api';
+        this.apiBaseUrl = 'http://localhost:8080/api';
+        console.log('CVAdapter constructor: this.apiBaseUrl =', this.apiBaseUrl); // Log after setting
         this.initializeEventListeners();
     }
 
@@ -61,6 +62,8 @@ class CVAdapter {
     }
 
     async handleAdaptCV() {
+        console.log('handleAdaptCV: this.apiBaseUrl =', this.apiBaseUrl); // Log at the beginning of the method
+
         const cvFile = document.getElementById('cv-file').files[0];
         const jobUrl = document.getElementById('job-url').value.trim();
 
@@ -72,12 +75,15 @@ class CVAdapter {
         this.showLoading(true);
         this.hideError();
 
+        const apiUrl = `${this.apiBaseUrl}/adapt-cv`;
+        console.log(`Attempting to fetch from: ${apiUrl}`); // Log the fully constructed URL
+
         try {
             const formData = new FormData();
             formData.append('cv_file', cvFile);
             formData.append('job_url', jobUrl);
 
-            const response = await fetch(`${this.apiBaseUrl}/adapt-cv`, {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 body: formData
             });
