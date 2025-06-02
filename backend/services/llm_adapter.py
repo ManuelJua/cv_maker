@@ -38,8 +38,7 @@ class LLMAdapter:
 
         except Exception as e:
             logger.error(f"Error adapting CV with LLM: {str(e)}")
-            # Fallback to basic adaptation
-            # return self._basic_adaptation_fallback(cv_content, job_description)
+            raise Exception(f"{str(e)}") 
 
     async def _adapt_with_google_ai(self, cv_content: str, job_description: str) -> str:
         """Adapt CV using Google AI Studio API."""
@@ -55,8 +54,8 @@ class LLMAdapter:
                 model=self.model, contents=full_prompt
             )
 
-            # if not response.text:
-            #     raise Exception("Empty response from Google AI")
+            if not response.text:
+                raise Exception("Empty response from Google AI")
 
             adapted_cv = response.text.strip()
             return self._format_as_markdown(adapted_cv)
@@ -92,6 +91,10 @@ ORIGINAL CV:
 {cv_content}
 
 Provide de CV adapted only.
+Remove the "markdown" words.
+Match the CV role with the Job description role.
+Match the CV location with the Job description location.
+
 ADAPTED CV:"""
 
     def _format_as_markdown(self, content: str) -> str:
