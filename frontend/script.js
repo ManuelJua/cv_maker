@@ -9,11 +9,13 @@ class CVAdapter {
         const cvFileInput = document.getElementById('cv-file');
         const jobUrlInput = document.getElementById('job-url');
         const adaptBtn = document.getElementById('adapt-btn');
-        const downloadBtn = document.getElementById('download-btn');
+        const downloadMdBtn = document.getElementById('download-md-btn');
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
         cvFileInput.addEventListener('change', this.handleFileSelect.bind(this));
         adaptBtn.addEventListener('click', this.handleAdaptCV.bind(this));
-        downloadBtn.addEventListener('click', this.handleDownload.bind(this));
+        downloadMdBtn.addEventListener('click', this.handleDownloadMarkdown.bind(this));
+        downloadPdfBtn.addEventListener('click', this.handleDownloadPDF.bind(this));
 
         // Enable/disable adapt button based on inputs
         [cvFileInput, jobUrlInput].forEach(input => {
@@ -208,7 +210,7 @@ class CVAdapter {
             .replace(/<\/?p>/gim, '');
     }
 
-    handleDownload() {
+    handleDownloadMarkdown() {
         if (!this.currentAdaptedCV) {
             this.showError('No adapted CV available for download.');
             return;
@@ -223,6 +225,103 @@ class CVAdapter {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    async handleDownloadPDF() {
+        if (!this.currentAdaptedCV) {
+            this.showError('No adapted CV available for download.');
+            return;
+        }
+
+        try {
+            // Get the CV content element
+            const cvContent = document.getElementById('cv-content');
+            if (!cvContent) {
+                this.showError('CV content not found.');
+                return;
+            }
+
+            // Create a temporary container for PDF generation
+            const pdfContainer = document.createElement('div');
+            pdfContainer.innerHTML = cvContent.innerHTML;
+            
+            // Apply PDF-friendly styles
+            pdfContainer.style.cssText = `
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                line-height: 1.4;
+                color: #333;
+                max-width: 800px;
+                margin: 0;
+                padding: 20px;
+                background: white;
+            `;
+
+            // Style headings for PDF
+            const headings = pdfContainer.querySelectorAll('h1, h2, h3');
+            headings.forEach(heading => {
+                if (heading.tagName === 'H1') {
+                    heading.style.cssText = 'font-size: 18px; font-weight: bold; margin: 0 0 10px 0; border-bottom: 2px solid #333; padding-bottom: 5px;';
+                } else if (heading.tagName === 'H2') {
+                    heading.style.cssText = 'font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #444;';
+                } else if (heading.tagName === 'H3') {
+                    heading.style.cssText = 'font-size: 14px; font-weight: bold; margin: 12px 0 6px 0; color: #555;';
+                }
+            });
+
+            // Style lists for PDF
+            const lists = pdfContainer.querySelectorAll('ul, ol');
+            lists.forEach(list => {
+                list.style.cssText = 'margin: 8px 0; padding-left: 20px;';
+            });
+
+            // Style list items
+            const listItems = pdfContainer.querySelectorAll('li');
+            listItems.forEach(item => {
+                item.style.cssText = 'margin: 3px 0;';
+            });
+
+            // Style paragraphs
+            const paragraphs = pdfContainer.querySelectorAll('p');
+            paragraphs.forEach(p => {
+                p.style.cssText = 'margin: 6px 0;';
+            });
+
+            // Style strong and em elements
+            const strongElements = pdfContainer.querySelectorAll('strong');
+            strongElements.forEach(strong => {
+                strong.style.cssText = 'font-weight: bold;';
+            });
+
+            const emElements = pdfContainer.querySelectorAll('em');
+            emElements.forEach(em => {
+                em.style.cssText = 'font-style: italic;';
+            });
+
+            // Configure PDF options
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: 'adapted_cv.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            // Generate and download PDF
+            await html2pdf().set(opt).from(pdfContainer).save();
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            this.showError('Failed to generate PDF. Please try again or download as markdown.');
+        }
     }
 
     showLoading(show) {

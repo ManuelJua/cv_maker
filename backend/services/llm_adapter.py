@@ -94,6 +94,10 @@ Provide de CV adapted only.
 Remove the "markdown" words.
 Match the CV role with the Job description role.
 Match the CV location with the Job description location.
+All the section titles must be written with heading level 2 
+The name mut be in heading title level 1
+The role title, location, phone number, email, linkedin and github at the beggining must be written with a breakdown and heading level 4
+
 
 ADAPTED CV:"""
 
