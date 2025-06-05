@@ -210,6 +210,42 @@ class CVAdapter {
             .replace(/<\/?p>/gim, '');
     }
 
+    extractNameAndRole(cvContent) {
+        if (!cvContent) return { name: 'CV', role: 'Document' };
+
+        const lines = cvContent.split('\n').filter(line => line.trim());
+        
+        // Extract name from the first line
+        let name = lines[0] ? lines[0].trim() : 'CV';
+        
+        // Extract role from the second line
+        let role = lines[1] ? lines[1].trim() : 'Document';
+
+        // Remove markdown formatting if present
+        name = name.replace(/^#+\s*/, '').trim(); // Remove heading markers
+        role = role.replace(/^#+\s*/, '').trim(); // Remove heading markers
+
+        // Clean up the extracted values (remove special characters except hyphens and spaces)
+        name = name.replace(/[^\w\s-]/g, '').trim();
+        role = role.replace(/[^\w\s-]/g, '').trim();
+
+        // Fallback if extraction failed
+        if (!name || name.length < 2) name = 'CV';
+        if (!role || role.length < 2) role = 'Document';
+
+        return { name, role };
+    }
+
+    generateFilename(extension = '') {
+        const { name, role } = this.extractNameAndRole(this.currentAdaptedCV);
+        
+        // Create filename in format "full_name_role"
+        const cleanName = name.replace(/\s+/g, '_').toLowerCase();
+        const cleanRole = role.replace(/\s+/g, '_').toLowerCase();
+        
+        return `${cleanName}_${cleanRole}${extension}`;
+    }
+
     handleDownloadMarkdown() {
         if (!this.currentAdaptedCV) {
             this.showError('No adapted CV available for download.');
@@ -220,7 +256,7 @@ class CVAdapter {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'adapted_cv.md';
+        a.download = this.generateFilename('.md');
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -256,7 +292,7 @@ class CVAdapter {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'adapted_cv.pdf';
+            a.download = this.generateFilename('.pdf');
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -302,4 +338,4 @@ class CVAdapter {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     new CVAdapter();
-});                    
+});
