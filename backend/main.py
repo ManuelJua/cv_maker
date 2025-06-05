@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 import uvicorn
 from typing import Optional
 import logging
@@ -8,6 +8,7 @@ import logging
 from services.cv_processor import CVProcessor
 from services.job_scraper import JobScraper
 from services.llm_adapter import LLMAdapter
+from services.pdf_generator import PDFGenerator
 from models.schemas import AdaptCVResponse, ErrorResponse
 
 # Configure logging
@@ -33,6 +34,7 @@ app.add_middleware(
 cv_processor = CVProcessor()
 job_scraper = JobScraper()
 llm_adapter = LLMAdapter()
+pdf_generator = PDFGenerator()
 
 @app.get("/")
 async def root():
@@ -101,6 +103,50 @@ async def adapt_cv(
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"
+        )
+
+@app.post("/api/convert-to-pdf")
+async def convert_markdown_to_pdf(
+    markdown_content: str = Form(...)
+):
+    """
+    Convert markdown content to PDF.
+    
+    Args:
+        markdown_content: CV content in markdown format
+    
+    Returns:
+        PDF file as bytes
+    """
+    try:
+        logger.info("Converting markdown to PDF")
+        
+        if not markdown_content.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Markdown content cannot be empty"
+            )
+        
+        # Generate PDF from markdown
+        pdf_bytes = pdf_generator.markdown_to_pdf(markdown_content)
+        
+        logger.info("PDF generation completed successfully")
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": "attachment; filename=adapted_cv.pdf"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error converting to PDF: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate PDF: {str(e)}"
         )
 
 @app.exception_handler(HTTPException)

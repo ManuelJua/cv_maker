@@ -1,7 +1,7 @@
 class CVAdapter {
     constructor() {
         this.apiBaseUrl = 'http://localhost:8080/api';
-        console.log('CVAdapter constructor: this.apiBaseUrl =', this.apiBaseUrl); // Log after setting
+        console.log('CVAdapter constructor: this.apiBaseUrl =', this.apiBaseUrl);
         this.initializeEventListeners();
     }
 
@@ -64,7 +64,7 @@ class CVAdapter {
     }
 
     async handleAdaptCV() {
-        console.log('handleAdaptCV: this.apiBaseUrl =', this.apiBaseUrl); // Log at the beginning of the method
+        console.log('handleAdaptCV: this.apiBaseUrl =', this.apiBaseUrl);
 
         const cvFile = document.getElementById('cv-file').files[0];
         const jobUrl = document.getElementById('job-url').value.trim();
@@ -78,7 +78,7 @@ class CVAdapter {
         this.hideError();
 
         const apiUrl = `${this.apiBaseUrl}/adapt-cv`;
-        console.log(`Attempting to fetch from: ${apiUrl}`); // Log the fully constructed URL
+        console.log(`Attempting to fetch from: ${apiUrl}`);
 
         try {
             const formData = new FormData();
@@ -234,93 +234,37 @@ class CVAdapter {
         }
 
         try {
-            // Get the CV content element
-            const cvContent = document.getElementById('cv-content');
-            if (!cvContent) {
-                this.showError('CV content not found.');
-                return;
+            const apiUrl = `${this.apiBaseUrl}/convert-to-pdf`;
+            
+            const formData = new FormData();
+            formData.append('markdown_content', this.currentAdaptedCV);
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to generate PDF');
             }
 
-            // Create a temporary container for PDF generation
-            const pdfContainer = document.createElement('div');
-            pdfContainer.innerHTML = cvContent.innerHTML;
+            // Create blob from response
+            const blob = await response.blob();
             
-            // Apply PDF-friendly styles
-            pdfContainer.style.cssText = `
-                font-family: Arial, sans-serif;
-                font-size: 12px;
-                line-height: 1.4;
-                color: #333;
-                max-width: 800px;
-                margin: 0;
-                padding: 20px;
-                background: white;
-            `;
-
-            // Style headings for PDF
-            const headings = pdfContainer.querySelectorAll('h1, h2, h3');
-            headings.forEach(heading => {
-                if (heading.tagName === 'H1') {
-                    heading.style.cssText = 'font-size: 18px; font-weight: bold; margin: 0 0 10px 0; border-bottom: 2px solid #333; padding-bottom: 5px;';
-                } else if (heading.tagName === 'H2') {
-                    heading.style.cssText = 'font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #444;';
-                } else if (heading.tagName === 'H3') {
-                    heading.style.cssText = 'font-size: 14px; font-weight: bold; margin: 12px 0 6px 0; color: #555;';
-                }
-            });
-
-            // Style lists for PDF
-            const lists = pdfContainer.querySelectorAll('ul, ol');
-            lists.forEach(list => {
-                list.style.cssText = 'margin: 8px 0; padding-left: 20px;';
-            });
-
-            // Style list items
-            const listItems = pdfContainer.querySelectorAll('li');
-            listItems.forEach(item => {
-                item.style.cssText = 'margin: 3px 0;';
-            });
-
-            // Style paragraphs
-            const paragraphs = pdfContainer.querySelectorAll('p');
-            paragraphs.forEach(p => {
-                p.style.cssText = 'margin: 6px 0;';
-            });
-
-            // Style strong and em elements
-            const strongElements = pdfContainer.querySelectorAll('strong');
-            strongElements.forEach(strong => {
-                strong.style.cssText = 'font-weight: bold;';
-            });
-
-            const emElements = pdfContainer.querySelectorAll('em');
-            emElements.forEach(em => {
-                em.style.cssText = 'font-style: italic;';
-            });
-
-            // Configure PDF options
-            const opt = {
-                margin: [10, 10, 10, 10],
-                filename: 'adapted_cv.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    useCORS: true,
-                    letterRendering: true
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait' 
-                }
-            };
-
-            // Generate and download PDF
-            await html2pdf().set(opt).from(pdfContainer).save();
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'adapted_cv.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
         } catch (error) {
-            console.error('Error generating PDF:', error);
-            this.showError('Failed to generate PDF. Please try again or download as markdown.');
+            console.error('Error downloading PDF:', error);
+            this.showError(error.message || 'Failed to generate PDF. Please try again or download as markdown.');
         }
     }
 
@@ -358,4 +302,4 @@ class CVAdapter {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     new CVAdapter();
-});
+});                    
