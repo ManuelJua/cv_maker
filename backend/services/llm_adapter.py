@@ -58,7 +58,8 @@ class LLMAdapter:
                 raise Exception("Empty response from Google AI")
 
             adapted_cv = response.text.strip()
-            return self._format_as_markdown(adapted_cv)
+            # return self._format_as_markdown(adapted_cv)
+            return adapted_cv
            
 
         except Exception as e:
