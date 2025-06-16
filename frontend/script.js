@@ -1,6 +1,6 @@
 class CVAdapter {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:8080/api';
+        this.apiBaseUrl = `${window.APP_URL || 'http://localhost:8080'}/api`;
         console.log('CVAdapter constructor: this.apiBaseUrl =', this.apiBaseUrl);
         this.initializeEventListeners();
     }
