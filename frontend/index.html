@@ -10,11 +10,19 @@
     <div class="container">
         <header>
             <h1>CV Adapter</h1>
-            <p>Adapt your CV to match job descriptions automatically</p>
+            <p>Adapt your CV or generate a cover letter for job descriptions automatically</p>
         </header>
 
         <main>
             <section class="upload-section">
+                <div class="input-group">
+                    <label for="action-type">Choose Action</label>
+                    <select id="action-type" class="action-select">
+                        <option value="adapt-cv">Adapt CV</option>
+                        <option value="cover-letter">Generate Cover Letter</option>
+                    </select>
+                </div>
+
                 <div class="input-group">
                     <label for="cv-file">Upload your CV (PDF or TXT)</label>
                     <input type="file" id="cv-file" accept=".pdf,.txt" required>
@@ -26,17 +34,17 @@
                     <input type="url" id="job-url" placeholder="https://..." required>
                 </div>
 
-                <button id="adapt-btn" class="btn-primary">Adapt CV</button>
+                <button id="process-btn" class="btn-primary">Process</button>
             </section>
 
             <section class="loading-section" style="display: none;">
                 <div class="spinner"></div>
-                <p>Processing your CV adaptation...</p>
+                <p id="loading-text">Processing your request...</p>
             </section>
 
             <section class="results-section" style="display: none;">
                 <div class="results-header">
-                    <h2>Results</h2>
+                    <h2 id="results-title">Results</h2>
                     <div class="download-options">
                         <button id="download-md-btn" class="btn-secondary">Download Markdown</button>
                         <button id="download-pdf-btn" class="btn-primary">Download PDF</button>
@@ -52,9 +60,9 @@
                     </div>
                     
                     <div class="adapted-cv-section">
-                        <h3>Adapted CV</h3>
+                        <h3 id="content-title">Adapted CV</h3>
                         <div class="cv-preview" id="cv-content">
-                            <!-- Adapted CV content will be displayed here -->
+                            <!-- Adapted CV or cover letter content will be displayed here -->
                         </div>
                     </div>
                 </div>

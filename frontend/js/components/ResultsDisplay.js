@@ -5,13 +5,25 @@ export class ResultsDisplay {
         this.onContentChange = onContentChange;
     }
 
-    displayResults(result) {
+    displayResults(result, actionType = 'adapt-cv') {
         const resultsSection = document.querySelector('.results-section');
         const cvContent = document.getElementById('cv-content');
         const jobDescriptionContent = document.getElementById('job-description-content');
+        const contentTitle = document.getElementById('content-title');
+        const resultsTitle = document.getElementById('results-title');
         
-        // Display the adapted CV and make it editable
-        cvContent.innerHTML = MarkdownConverter.markdownToHtml(result.adapted_cv);
+        // Update titles based on action type
+        if (actionType === 'cover-letter') {
+            contentTitle.textContent = 'Generated Cover Letter';
+            resultsTitle.textContent = 'Cover Letter Results';
+        } else {
+            contentTitle.textContent = 'Adapted CV';
+            resultsTitle.textContent = 'CV Adaptation Results';
+        }
+        
+        // Display the content and make it editable
+        const content = result.adapted_cv || result.cover_letter;
+        cvContent.innerHTML = MarkdownConverter.markdownToHtml(content);
         cvContent.contentEditable = true;
         cvContent.setAttribute('spellcheck', 'true');
         

@@ -29,8 +29,13 @@ export class UIController {
         }
     }
 
+    updateProcessButton(isEnabled) {
+        const processBtn = document.getElementById('process-btn');
+        processBtn.disabled = !isEnabled;
+    }
+
+    // Keep backward compatibility
     updateAdaptButton(isEnabled) {
-        const adaptBtn = document.getElementById('adapt-btn');
-        adaptBtn.disabled = !isEnabled;
+        this.updateProcessButton(isEnabled);
     }
 }

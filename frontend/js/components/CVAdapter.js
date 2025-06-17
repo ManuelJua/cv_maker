@@ -21,39 +21,60 @@ export class CVAdapter {
         this.currentState = {
             hasValidFile: false,
             hasValidUrl: false,
-            adaptedCV: null
+            adaptedContent: null,
+            actionType: 'adapt-cv'
         };
         
         this.initializeEventListeners();
     }
 
     initializeEventListeners() {
-        const adaptBtn = document.getElementById('adapt-btn');
-        adaptBtn.addEventListener('click', this.handleAdaptCV.bind(this));
+        const processBtn = document.getElementById('process-btn');
+        const actionSelect = document.getElementById('action-type');
+        
+        processBtn.addEventListener('click', this.handleProcess.bind(this));
+        actionSelect.addEventListener('change', this.handleActionChange.bind(this));
+    }
+
+    handleActionChange() {
+        const actionSelect = document.getElementById('action-type');
+        this.currentState.actionType = actionSelect.value;
+        
+        // Update UI text based on selected action
+        const processBtn = document.getElementById('process-btn');
+        const loadingText = document.getElementById('loading-text');
+        
+        if (this.currentState.actionType === 'cover-letter') {
+            processBtn.textContent = 'Generate Cover Letter';
+            loadingText.textContent = 'Generating your cover letter...';
+        } else {
+            processBtn.textContent = 'Adapt CV';
+            loadingText.textContent = 'Processing your CV adaptation...';
+        }
     }
 
     handleFileSelect(file) {
         this.currentState.hasValidFile = !!file;
-        this.updateAdaptButton();
+        this.updateProcessButton();
     }
 
     handleUrlChange(url, isValid) {
         this.currentState.hasValidUrl = isValid;
-        this.updateAdaptButton();
+        this.updateProcessButton();
     }
 
     handleContentChange(content) {
-        this.currentState.adaptedCV = content;
+        this.currentState.adaptedContent = content;
         this.downloadManager.setCurrentCV(content);
     }
 
-    updateAdaptButton() {
+    updateProcessButton() {
         const isEnabled = this.currentState.hasValidFile && this.currentState.hasValidUrl;
-        this.uiController.updateAdaptButton(isEnabled);
+        this.uiController.updateProcessButton(isEnabled);
     }
 
-    async handleAdaptCV() {
-        console.log('handleAdaptCV: API Base URL =', CONFIG.API_BASE_URL);
+    async handleProcess() {
+        console.log('handleProcess: API Base URL =', CONFIG.API_BASE_URL);
 
         const cvFile = this.fileHandler.getSelectedFile();
         const jobUrl = this.urlValidator.getJobUrl();
@@ -67,14 +88,21 @@ export class CVAdapter {
         this.uiController.hideError();
 
         try {
-            const result = await this.apiService.adaptCV(cvFile, jobUrl);
-            this.resultsDisplay.displayResults(result);
-            this.currentState.adaptedCV = result.adapted_cv;
-            this.downloadManager.setCurrentCV(result.adapted_cv);
+            let result;
+            if (this.currentState.actionType === 'cover-letter') {
+                result = await this.apiService.generateCoverLetter(cvFile, jobUrl);
+                result.adapted_cv = result.cover_letter; // Normalize the response
+            } else {
+                result = await this.apiService.adaptCV(cvFile, jobUrl);
+            }
+            
+            this.resultsDisplay.displayResults(result, this.currentState.actionType);
+            this.currentState.adaptedContent = result.adapted_cv || result.cover_letter;
+            this.downloadManager.setCurrentCV(this.currentState.adaptedContent);
 
         } catch (error) {
-            console.error('Error adapting CV:', error);
-            this.uiController.showError(error.message || 'An error occurred while adapting your CV. Please try again.');
+            console.error('Error processing request:', error);
+            this.uiController.showError(error.message || 'An error occurred while processing your request. Please try again.');
         } finally {
             this.uiController.showLoading(false);
         }

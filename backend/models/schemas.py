@@ -1,11 +1,17 @@
 from pydantic import BaseModel, HttpUrl
-from typing import Optional
+from typing import Optional, Literal
 
 class AdaptCVRequest(BaseModel):
     job_url: HttpUrl
     
 class AdaptCVResponse(BaseModel):
     adapted_cv: str
+    job_description: str
+    original_cv_length: int
+    job_description_length: int
+
+class CoverLetterResponse(BaseModel):
+    cover_letter: str
     job_description: str
     original_cv_length: int
     job_description_length: int
