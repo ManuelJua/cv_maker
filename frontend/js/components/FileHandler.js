@@ -55,7 +55,7 @@ export class FileHandler {
         filesList.innerHTML = cachedCVs.map(cv => `
             <div class="cached-file-item" data-file-name="${cv.fileName}">
                 <span class="file-name">${cv.fileName}</span>
-                <span class="file-date">${this.formatDate(cv.timestamp)}</span>
+                <span class="file-date">Uploaded on ${this.formatUploadDate(cv.timestamp)}</span>
             </div>
         `).join('');
     }
@@ -97,6 +97,15 @@ export class FileHandler {
         if (diffDays === 1) return 'Yesterday';
         if (diffDays < 7) return `${diffDays} days ago`;
         return date.toLocaleDateString();
+    }
+
+    formatUploadDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-UK', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     }
 
     async handleFileSelect(event) {
