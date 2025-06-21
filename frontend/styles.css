@@ -218,7 +218,79 @@ main {
     border: 1px solid #f5c6cb;
 }
 
-/* Results container with two columns */
+/* Cached files styles */
+.cached-files-container {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.cached-files-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.clear-cache-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.clear-cache-btn:hover {
+    background-color: #e9ecef;
+}
+
+.cached-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cached-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cached-file-item:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+    transform: translateX(2px);
+}
+
+.cached-file-item .file-name {
+    font-weight: 500;
+    color: #495057;
+    flex-grow: 1;
+}
+
+.cached-file-item .file-date {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.cached-indicator {
+    color: #2e7d32;
+    font-weight: 500;
+}
+
 .results-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -304,5 +376,19 @@ main {
     .results-container {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+    
+    .cached-files-container {
+        padding: 12px;
+    }
+    
+    .cached-file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .cached-file-item .file-date {
+        align-self: flex-end;
     }
 }
