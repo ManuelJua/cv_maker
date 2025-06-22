@@ -39,25 +39,30 @@ export class FileHandler {
             cachedFilesContainer.innerHTML = `
                 <div class="cached-files-header">
                     <span>Recently uploaded CVs:</span>
-                    <button type="button" class="clear-cache-btn" title="Clear all cached files">🗑️</button>
                 </div>
                 <div class="cached-files-list"></div>
             `;
             fileInputGroup.appendChild(cachedFilesContainer);
-            
-            // Add clear cache event listener
-            cachedFilesContainer.querySelector('.clear-cache-btn').addEventListener('click', () => {
-                this.clearCache();
-            });
         }
 
         const filesList = cachedFilesContainer.querySelector('.cached-files-list');
         filesList.innerHTML = cachedCVs.map(cv => `
             <div class="cached-file-item" data-file-name="${cv.fileName}">
-                <span class="file-name">${cv.fileName}</span>
-                <span class="file-date">Uploaded on ${this.formatUploadDate(cv.timestamp)}</span>
+                <div class="file-info-section">
+                    <span class="file-name">${cv.fileName}</span>
+                    <span class="file-date">Uploaded on ${this.formatUploadDate(cv.timestamp)}</span>
+                </div>
+                <button type="button" class="delete-file-btn" data-file-name="${cv.fileName}" title="Delete this file">🗑️</button>
             </div>
         `).join('');
+
+        // Add event listeners for individual delete buttons
+        filesList.querySelectorAll('.delete-file-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering file selection
+                this.deleteCachedFile(btn.dataset.fileName);
+            });
+        });
     }
 
     async selectCachedFile(fileName) {
@@ -210,6 +215,35 @@ export class FileHandler {
                 const fileInfo = document.querySelector('.file-info');
                 fileInfo.textContent = '';
                 this.onFileSelect(null);
+            }
+        }
+    }
+
+    deleteCachedFile(fileName) {
+        if (confirm(`Are you sure you want to delete "${fileName}" from cache?`)) {
+            const cache = this.cacheManager.getOriginalCVCache();
+            const updatedCache = cache.filter(item => item.fileName !== fileName);
+            
+            // Update cache in localStorage
+            localStorage.setItem('cv_original_cache', JSON.stringify(updatedCache));
+            
+            // Reset file selection if the deleted file was currently selected
+            if (this.cachedFile && this.cachedFile.name === fileName) {
+                this.cachedFile = null;
+                const fileInfo = document.querySelector('.file-info');
+                fileInfo.textContent = '';
+                this.onFileSelect(null);
+            }
+            
+            // Refresh the display
+            this.displayCachedFiles();
+            
+            // If no files left, remove the container
+            if (updatedCache.length === 0) {
+                const cachedFilesContainer = document.querySelector('.cached-files-container');
+                if (cachedFilesContainer) {
+                    cachedFilesContainer.remove();
+                }
             }
         }
     }
