@@ -13,6 +13,11 @@ export class CVAdapter {
         this.apiService = new ApiService();
         this.uiController = new UIController();
         
+        // Store DOM element references
+        this.actionSelect = document.getElementById('action-type');
+        this.processBtn = document.getElementById('process-btn');
+        this.loadingText = document.getElementById('loading-text');
+        
         this.fileHandler = new FileHandler(this.handleFileSelect.bind(this));
         this.urlValidator = new UrlValidator(this.handleUrlChange.bind(this));
         this.resultsDisplay = new ResultsDisplay(this.handleContentChange.bind(this));
@@ -29,27 +34,20 @@ export class CVAdapter {
     }
 
     initializeEventListeners() {
-        const processBtn = document.getElementById('process-btn');
-        const actionSelect = document.getElementById('action-type');
-        
-        processBtn.addEventListener('click', this.handleProcess.bind(this));
-        actionSelect.addEventListener('change', this.handleActionChange.bind(this));
+        this.processBtn.addEventListener('click', this.handleProcess.bind(this));
+        this.actionSelect.addEventListener('change', this.handleActionChange.bind(this));
     }
 
     handleActionChange() {
-        const actionSelect = document.getElementById('action-type');
-        this.currentState.actionType = actionSelect.value;
+        this.currentState.actionType = this.actionSelect.value;
         
         // Update UI text based on selected action
-        const processBtn = document.getElementById('process-btn');
-        const loadingText = document.getElementById('loading-text');
-        
         if (this.currentState.actionType === 'cover-letter') {
-            processBtn.textContent = 'Generate Cover Letter';
-            loadingText.textContent = 'Generating your cover letter...';
+            this.processBtn.textContent = 'Generate Cover Letter';
+            this.loadingText.textContent = 'Generating your cover letter...';
         } else {
-            processBtn.textContent = 'Adapt CV';
-            loadingText.textContent = 'Processing your CV adaptation...';
+            this.processBtn.textContent = 'Adapt CV';
+            this.loadingText.textContent = 'Processing your CV adaptation...';
         }
     }
 
@@ -65,7 +63,7 @@ export class CVAdapter {
 
     handleContentChange(content) {
         this.currentState.adaptedContent = content;
-        this.downloadManager.setCurrentCV(content);
+        this.downloadManager.setCurrentCV(content, this.currentState.actionType);
     }
 
     updateProcessButton() {
@@ -98,7 +96,7 @@ export class CVAdapter {
             
             this.resultsDisplay.displayResults(result, this.currentState.actionType);
             this.currentState.adaptedContent = result.adapted_cv || result.cover_letter;
-            this.downloadManager.setCurrentCV(this.currentState.adaptedContent);
+            this.downloadManager.setCurrentCV(this.currentState.adaptedContent, this.currentState.actionType);
 
         } catch (error) {
             console.error('Error processing request:', error);

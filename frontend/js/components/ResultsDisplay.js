@@ -42,16 +42,6 @@ export class ResultsDisplay {
             jobDescriptionContent.innerHTML = '<p class="no-content">No job description could be extracted from the provided URL.</p>';
         }
         
-        // Make job description editable
-        jobDescriptionContent.contentEditable = true;
-        jobDescriptionContent.setAttribute('spellcheck', 'true');
-        this.styleEditableContent(jobDescriptionContent);
-        
-        // Add event listener for job description changes (optional - if you want to track changes)
-        jobDescriptionContent.addEventListener('input', () => {
-            // You can add logic here if you need to track job description changes
-            console.log('Job description modified');
-        });
         
         resultsSection.style.display = 'block';
         resultsSection.scrollIntoView({ behavior: 'smooth' });

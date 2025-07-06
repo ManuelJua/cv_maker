@@ -3,6 +3,7 @@ export class DownloadManager {
         this.apiService = apiService;
         this.onError = onError;
         this.currentAdaptedCV = null;
+        this.actionType = 'adapt-cv'; // Add action type tracking
         this.initializeEventListeners();
     }
 
@@ -33,8 +34,9 @@ export class DownloadManager {
         });
     }
 
-    setCurrentCV(cvContent) {
+    setCurrentCV(cvContent, actionType = 'adapt-cv') {
         this.currentAdaptedCV = cvContent;
+        this.actionType = actionType; // Store the action type
     }
 
     extractNameAndRole(cvContent) {
@@ -61,6 +63,12 @@ export class DownloadManager {
     }
 
     generateFilename(extension = '') {
+        // If it's a cover letter, use fixed filename
+        if (this.actionType === 'cover-letter') {
+            return `cover_letter${extension}`;
+        }
+        
+        // Otherwise, use the existing logic for CV adaptation
         const { name, role } = this.extractNameAndRole(this.currentAdaptedCV);
         
         const cleanName = name.replace(/\s+/g, '_').toLowerCase();
