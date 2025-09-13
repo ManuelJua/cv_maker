@@ -22,7 +22,8 @@ export class CVAdapter {
             hasValidFile: false,
             hasValidUrl: false,
             adaptedContent: null,
-            actionType: 'adapt-cv'
+            actionType: 'adapt-cv',
+            additionalInstructions: ''
         };
         
         this.initializeEventListeners();
@@ -31,9 +32,27 @@ export class CVAdapter {
     initializeEventListeners() {
         const processBtn = document.getElementById('process-btn');
         const actionSelect = document.getElementById('action-type');
+        const addInstructionsBtn = document.getElementById('add-instructions-btn');
+        const modal = document.getElementById('instructions-modal');
+        const closeBtn = document.getElementById('instructions-close-btn');
+        const cancelBtn = document.getElementById('instructions-cancel-btn');
+        const saveBtn = document.getElementById('instructions-save-btn');
+        const textarea = document.getElementById('instructions-textarea');
         
         processBtn.addEventListener('click', this.handleProcess.bind(this));
         actionSelect.addEventListener('change', this.handleActionChange.bind(this));
+
+        // Modal open/close handlers
+        addInstructionsBtn?.addEventListener('click', () => {
+            textarea.value = this.currentState.additionalInstructions || '';
+            modal.classList.remove('hidden');
+        });
+        closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+        cancelBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+        saveBtn?.addEventListener('click', () => {
+            this.currentState.additionalInstructions = textarea.value.trim();
+            modal.classList.add('hidden');
+        });
     }
 
     handleActionChange() {
@@ -90,10 +109,10 @@ export class CVAdapter {
         try {
             let result;
             if (this.currentState.actionType === 'cover-letter') {
-                result = await this.apiService.generateCoverLetter(cvFile, jobUrl);
+                result = await this.apiService.generateCoverLetter(cvFile, jobUrl, this.currentState.additionalInstructions);
                 result.adapted_cv = result.cover_letter; // Normalize the response
             } else {
-                result = await this.apiService.adaptCV(cvFile, jobUrl);
+                result = await this.apiService.adaptCV(cvFile, jobUrl, this.currentState.additionalInstructions);
             }
             
             this.resultsDisplay.displayResults(result, this.currentState.actionType);

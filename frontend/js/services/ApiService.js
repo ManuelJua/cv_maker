@@ -5,10 +5,11 @@ export class ApiService {
         this.baseUrl = CONFIG.API_BASE_URL;
     }
 
-    async adaptCV(cvFile, jobUrl) {
+    async adaptCV(cvFile, jobUrl, additionalInstructions = '') {
         const formData = new FormData();
         formData.append('cv_file', cvFile);
         formData.append('job_url', jobUrl);
+        if (additionalInstructions) formData.append('additional_instructions', additionalInstructions);
 
         const response = await fetch(`${this.baseUrl}/adapt-cv`, {
             method: 'POST',
@@ -23,10 +24,11 @@ export class ApiService {
         return await response.json();
     }
 
-    async generateCoverLetter(cvFile, jobUrl) {
+    async generateCoverLetter(cvFile, jobUrl, additionalInstructions = '') {
         const formData = new FormData();
         formData.append('cv_file', cvFile);
         formData.append('job_url', jobUrl);
+        if (additionalInstructions) formData.append('additional_instructions', additionalInstructions);
 
         const response = await fetch(`${this.baseUrl}/generate-cover-letter`, {
             method: 'POST',

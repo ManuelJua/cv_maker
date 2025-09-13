@@ -47,7 +47,8 @@ async def health_check():
 @app.post("/api/adapt-cv", response_model=AdaptCVResponse)
 async def adapt_cv(
     cv_file: UploadFile = File(...),
-    job_url: str = Form(...)
+    job_url: str = Form(...),
+    additional_instructions: Optional[str] = Form(None)
 ):
     """
     Adapt a CV to match a job description from a given URL.
@@ -86,7 +87,7 @@ async def adapt_cv(
             )
         
         # Adapt CV using LLM
-        adapted_cv = await llm_adapter.adapt_cv(cv_content, job_description)
+        adapted_cv = await llm_adapter.adapt_cv(cv_content, job_description, additional_instructions=additional_instructions)
         
         logger.info("CV adaptation completed successfully")
         return AdaptCVResponse(
@@ -108,7 +109,8 @@ async def adapt_cv(
 @app.post("/api/generate-cover-letter", response_model=CoverLetterResponse)
 async def generate_cover_letter(
     cv_file: UploadFile = File(...),
-    job_url: str = Form(...)
+    job_url: str = Form(...),
+    additional_instructions: Optional[str] = Form(None)
 ):
     """
     Generate a cover letter based on a CV and job description from a given URL.
@@ -147,7 +149,7 @@ async def generate_cover_letter(
             )
         
         # Generate cover letter using LLM
-        cover_letter = await llm_adapter.generate_cover_letter(cv_content, job_description)
+        cover_letter = await llm_adapter.generate_cover_letter(cv_content, job_description, additional_instructions=additional_instructions)
         
         logger.info("Cover letter generation completed successfully")
         return CoverLetterResponse(

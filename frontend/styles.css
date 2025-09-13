@@ -56,6 +56,31 @@ main {
     color: #555;
 }
 
+/* Additional instructions UI */
+.hidden { display: none !important; }
+.instructions-group { margin-top: 10px; }
+.instructions-panel {
+    margin-top: 12px;
+    border: 1px solid #e1e5e9;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+}
+.instructions-panel label { display: block; margin-bottom: 8px; color: #495057; font-weight: 600; }
+.instructions-panel textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    padding: 10px;
+    border-radius: 6px;
+    border: 2px solid #e1e5e9;
+    font-size: 14px;
+    outline: none;
+}
+.instructions-panel textarea:focus { border-color: #667eea; }
+.instructions-panel .panel-actions { display: flex; gap: 10px; margin-top: 10px; }
+.instructions-panel .char-counter { margin-top: 6px; font-size: 12px; color: #6c757d; text-align: right; }
+
 .input-group input[type="file"],
 .input-group input[type="url"] {
     width: 100%;
@@ -104,10 +129,59 @@ main {
     transition: all 0.3s ease;
 }
 
+/* Spacing for main action buttons */
+.instructions-group { margin-bottom: 0; padding-bottom: 12px; }
+#add-instructions-btn { 
+    margin-bottom: 12px; /* Add gap below Add Instructions button */
+    width: 100%; 
+    display: block; 
+}
+#process-btn { 
+    margin-top: 0; /* Remove extra top margin if not needed */
+}
+
+/* Modal overlay for additional instructions */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal-overlay.hidden { display: none !important; }
+
+.modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 700px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.modal-header h3 { margin: 0; }
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    width: 100%;
 }
 
 .btn-primary:hover {
@@ -181,6 +255,9 @@ main {
     font-size: 14px;
 }
 
+/* Ensure only the main Process button expands full width */
+#process-btn { width: 100%; }
+
 .cv-preview {
     background: #f8f9fa;
     border: 1px solid #e9ecef;
@@ -207,6 +284,47 @@ main {
 .cv-preview ul {
     margin-left: 20px;
     margin-bottom: 15px;
+}
+
+/* Modify content section styles */
+.modify-content-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    text-align: center;
+}
+
+#modify-content-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+#modify-content-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+#modify-content-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+#modify-content-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .error-message {
@@ -391,4 +509,39 @@ main {
     .cached-file-item .file-date {
         align-self: flex-end;
     }
+}
+
+/* Accessibility and UX enhancements */
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+    outline: 3px solid rgba(102, 126, 234, 0.35);
+    outline-offset: 2px;
+}
+
+.input-group input:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.action-select:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.instructions-panel textarea:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.instructions-panel .panel-actions .btn-primary,
+.instructions-panel .panel-actions .btn-secondary {
+    width: auto;
+    padding: 10px 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner { animation: none; }
+    .btn-primary, .btn-secondary { transition: none; }
+}
+
+/* Ensure a visible gap when Process button follows Add instructions */
+.instructions-group + #process-btn {
+    margin-top: 12px;
 }
