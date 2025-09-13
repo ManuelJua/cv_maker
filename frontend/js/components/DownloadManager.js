@@ -9,6 +9,7 @@ export class DownloadManager {
     initializeEventListeners() {
         const downloadMdBtn = document.getElementById('download-md-btn');
         const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        const previewPdfBtn = document.getElementById('preview-pdf-btn');
 
         downloadMdBtn.addEventListener('click', () => {
             try {
@@ -20,7 +21,7 @@ export class DownloadManager {
                 }
             }
         });
-        
+
         downloadPdfBtn.addEventListener('click', async () => {
             try {
                 await this.handleDownloadPDF();
@@ -31,6 +32,34 @@ export class DownloadManager {
                 }
             }
         });
+
+        if (previewPdfBtn) {
+            previewPdfBtn.addEventListener('click', async () => {
+                try {
+                    await this.handlePreviewPDF();
+                } catch (error) {
+                    console.error('Error previewing PDF:', error);
+                    if (this.onError) {
+                        this.onError(error.message);
+                    }
+                }
+            });
+        }
+    }
+
+    async handlePreviewPDF() {
+        if (!this.currentAdaptedCV) {
+            throw new Error('No adapted CV available for preview.');
+        }
+        try {
+            const blob = await this.apiService.convertToPDF(this.currentAdaptedCV);
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            // Optionally, revokeObjectURL after some time
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } catch (error) {
+            throw new Error(error.message || 'Failed to generate PDF preview. Please try again.');
+        }
     }
 
     setCurrentCV(cvContent) {
