@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12
 
 
 WORKDIR /app
@@ -6,7 +6,7 @@ WORKDIR /app
 # Install dependencies (use requirements.txt for reproducible builds)
 COPY backend/requirements.txt /app/requirements.txt
 RUN python -m pip install --upgrade pip && \
-    pip install -r /app/requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
 COPY backend/ /app/
