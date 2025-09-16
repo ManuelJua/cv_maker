@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache
+
+# Venvs
+.venv/
+venv/
+
+# Git
+.git/
+.gitignore
+
+# Node
+frontend/node_modules/
+frontend/
+
+# Misc
+.DS_Store
+.env
+.env.*
+backend/.env
+**/.mypy_cache/
+**/.ruff_cache/
+
+# Build caches
+pip-wheel-metadata/
+backend/__pycache__/
