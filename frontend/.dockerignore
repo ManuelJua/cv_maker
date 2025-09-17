@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.DS_Store
+.git
+*.log
+*.tmp
+*.cache
+dist
+build
+coverage
+.env
+*.local
+*.test.js
+*.spec.js
