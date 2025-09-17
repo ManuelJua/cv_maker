@@ -1,0 +1,30 @@
+# Files and folders to exclude from the backend build context
+
+# Python caches & artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache
+
+# Virtual environments
+.venv/
+venv/
+
+# Git metadata (not needed in image)
+.git
+.gitignore
+
+# Environment & secrets
+.env
+.env.*
+
+# Type checker / linter caches
+.mypy_cache/
+.ruff_cache/
+
+# Build caches
+pip-wheel-metadata/
+
+# Editor / OS noise
+.DS_Store
