@@ -1,2 +1,2 @@
 // Make config globally available
-window.APP_URL = 'https://your-production-api.com';
+window.API_URL=process.env.API_URL
