@@ -1,2 +1,2 @@
 // Make config globally available
-window.APP_URL="https://localhost:8080"
+window.APP_URL="http://localhost:8080"

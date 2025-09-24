@@ -1,14 +1,14 @@
-FROM node:20-alpine
+FROM nginx:1.27-alpine
 
-WORKDIR /app
+# Copy Nginx config
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# No package-lock.json needed
-COPY . .
+# Copy static assets explicitly to the web root
+WORKDIR /usr/share/nginx/html
+COPY index.html .
+COPY styles.css .
+COPY js ./js
+COPY config.js ./config.js
 
-# Install a static file server
-RUN npm install -g serve
-
-EXPOSE 8000
-
-# Serve the static frontend
-CMD ["serve", "-s", "-l", "8000", "."]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
