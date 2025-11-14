@@ -16,13 +16,16 @@ export class ResultsDisplay {
         if (actionType === 'cover-letter') {
             contentTitle.textContent = 'Generated Cover Letter';
             resultsTitle.textContent = 'Cover Letter Results';
+        } else if (actionType === 'general-purpose') {
+            contentTitle.textContent = 'Processed Content';
+            resultsTitle.textContent = 'General Purpose Results';
         } else {
             contentTitle.textContent = 'Adapted CV';
             resultsTitle.textContent = 'CV Adaptation Results';
         }
         
         // Display the content and make it editable
-        const content = result.adapted_cv || result.cover_letter;
+        const content = result.adapted_cv || result.cover_letter || result.processed_content;
         cvContent.innerHTML = MarkdownConverter.markdownToHtml(content);
         cvContent.contentEditable = true;
         cvContent.setAttribute('spellcheck', 'true');

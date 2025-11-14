@@ -9,7 +9,7 @@ from services.cv_processor import CVProcessor
 from services.job_scraper import JobScraper
 from services.llm_adapter import LLMAdapter
 from services.pdf_generator import PDFGenerator
-from models.schemas import AdaptCVResponse, CoverLetterResponse, ErrorResponse
+from models.schemas import AdaptCVResponse, CoverLetterResponse, GeneralPurposeResponse, ErrorResponse
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -164,6 +164,78 @@ async def generate_cover_letter(
         raise
     except Exception as e:
         logger.error(f"Error generating cover letter: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+@app.post("/api/general-purpose", response_model=GeneralPurposeResponse)
+async def general_purpose(
+    cv_file: UploadFile = File(...),
+    job_url: str = Form(...),
+    additional_instructions: Optional[str] = Form(None)
+):
+    """
+    Process a CV and job description with custom instructions.
+    
+    Args:
+        cv_file: PDF or TXT file containing the CV
+        job_url: URL to the job description (LinkedIn, Indeed, Reed)
+        additional_instructions: Custom instructions for processing
+    
+    Returns:
+        GeneralPurposeResponse: Contains the processed content in markdown format
+    """
+    try:
+        logger.info(f"Processing general purpose request for URL: {job_url}")
+        
+        # Validate file type
+        if cv_file.content_type not in ["application/pdf", "text/plain"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid file type. Please upload a PDF or TXT file."
+            )
+        
+        # Read and process CV file
+        cv_content = await cv_processor.extract_text_from_file(cv_file)
+        if not cv_content.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Could not extract text from the CV file."
+            )
+        
+        # Scrape job description
+        job_description = await job_scraper.scrape_job_description(job_url)
+        if not job_description.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Could not extract job description from the provided URL."
+            )
+        
+        # Validate that additional instructions are provided
+        if not additional_instructions or not additional_instructions.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Additional instructions are required for general purpose processing."
+            )
+        
+        # Process with LLM using custom instructions
+        processed_content = await llm_adapter.general_purpose_process(
+            cv_content, job_description, additional_instructions
+        )
+        
+        logger.info("General purpose processing completed successfully")
+        return GeneralPurposeResponse(
+            processed_content=processed_content,
+            job_description=job_description,
+            original_cv_length=len(cv_content),
+            job_description_length=len(job_description)
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in general purpose processing: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"

@@ -58,6 +58,25 @@ class LLMAdapter:
             logger.error(f"Error generating cover letter with LLM: {str(e)}")
             raise Exception(f"{str(e)}")
 
+    async def general_purpose_process(self, cv_content: str, job_description: str, additional_instructions: str) -> str:
+        """
+        Process CV and job description with custom user instructions.
+
+        Args:
+            cv_content: Original CV text
+            job_description: Job description text
+            additional_instructions: Custom user instructions for processing
+
+        Returns:
+            str: Processed content in markdown format based on user instructions
+        """
+        try:
+            return await self._general_purpose_with_google_ai(cv_content, job_description, additional_instructions)
+
+        except Exception as e:
+            logger.error(f"Error in general purpose processing with LLM: {str(e)}")
+            raise Exception(f"{str(e)}")
+
     async def _adapt_with_google_ai(self, cv_content: str, job_description: str, additional_instructions: Optional[str] = None) -> str:
         """Adapt CV using Google AI Studio API."""
         try:
@@ -107,6 +126,29 @@ class LLMAdapter:
             logger.error(f"Google AI API error: {str(e)}")
             raise Exception(f"Failed to generate cover letter using Google AI: {str(e)}")
 
+    async def _general_purpose_with_google_ai(self, cv_content: str, job_description: str, additional_instructions: str) -> str:
+        """Process with custom instructions using Google AI Studio API."""
+        try:
+            if not self.google_api_key:
+                raise Exception("Google AI API key not configured")
+
+            prompt = self._create_general_purpose_prompt(cv_content, job_description, additional_instructions)
+            full_prompt = f"{self._get_general_purpose_system_prompt()}\n\n{prompt}"
+
+            response = self.client.models.generate_content(
+                model=self.model, contents=full_prompt
+            )
+
+            if not response.text:
+                raise Exception("Empty response from Google AI")
+
+            processed_content = response.text.strip()
+            return processed_content
+           
+        except Exception as e:
+            logger.error(f"Google AI API error: {str(e)}")
+            raise Exception(f"Failed to process with custom instructions using Google AI: {str(e)}")
+
     def _get_cv_system_prompt(self) -> str:
         """Get the system prompt for CV adaptation."""
         return """You are an expert CV/resume writer and career counselor. Your task is to adapt a CV to better match a specific job description while maintaining truthfulness and accuracy.
@@ -139,6 +181,21 @@ Guidelines:
 10. Make it personal and specific to avoid generic language
 
 The cover letter should demonstrate why the candidate is an excellent fit for this specific position."""
+
+    def _get_general_purpose_system_prompt(self) -> str:
+        """Get the system prompt for general purpose processing."""
+        return """You are an expert career counselor and content writer. Your task is to process a CV and job description according to the specific instructions provided by the user.
+
+Guidelines:
+1. Follow the user's instructions precisely
+2. Keep all factual information from the CV accurate - do not fabricate information
+3. Use information from both the CV and job description as needed
+4. Format the output in markdown
+5. Maintain a professional tone unless instructed otherwise
+6. Be creative and flexible based on user requirements
+7. If the instructions are unclear, do your best to interpret them reasonably
+
+The output should fulfill the user's specific requirements while maintaining professional quality."""
 
     def _create_adaptation_prompt(self, cv_content: str, job_description: str, additional_instructions: Optional[str] = None) -> str:
         """Create the adaptation prompt."""
@@ -197,3 +254,20 @@ Requirements:
 {extra}
 
 COVER LETTER:"""
+
+    def _create_general_purpose_prompt(self, cv_content: str, job_description: str, additional_instructions: str) -> str:
+        """Create the general purpose processing prompt."""
+        return f"""Process the following CV and job description according to the user's specific instructions.
+
+JOB DESCRIPTION:
+{job_description}
+
+CANDIDATE'S CV:
+{cv_content}
+
+USER INSTRUCTIONS:
+{additional_instructions.strip()}
+
+Please follow the user's instructions carefully and provide the output in markdown format.
+
+OUTPUT:"""

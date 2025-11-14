@@ -15,6 +15,12 @@ class CoverLetterResponse(BaseModel):
     job_description: str
     original_cv_length: int
     job_description_length: int
+
+class GeneralPurposeResponse(BaseModel):
+    processed_content: str
+    job_description: str
+    original_cv_length: int
+    job_description_length: int
     
 class ErrorResponse(BaseModel):
     detail: str

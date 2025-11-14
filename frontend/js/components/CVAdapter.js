@@ -66,6 +66,9 @@ export class CVAdapter {
         if (this.currentState.actionType === 'cover-letter') {
             processBtn.textContent = 'Generate Cover Letter';
             loadingText.textContent = 'Generating your cover letter...';
+        } else if (this.currentState.actionType === 'general-purpose') {
+            processBtn.textContent = 'Process';
+            loadingText.textContent = 'Processing your request...';
         } else {
             processBtn.textContent = 'Adapt CV';
             loadingText.textContent = 'Processing your CV adaptation...';
@@ -111,12 +114,21 @@ export class CVAdapter {
             if (this.currentState.actionType === 'cover-letter') {
                 result = await this.apiService.generateCoverLetter(cvFile, jobUrl, this.currentState.additionalInstructions);
                 result.adapted_cv = result.cover_letter; // Normalize the response
+            } else if (this.currentState.actionType === 'general-purpose') {
+                // Validate that instructions are provided for general purpose
+                if (!this.currentState.additionalInstructions || !this.currentState.additionalInstructions.trim()) {
+                    this.uiController.showError('Please provide instructions for general purpose processing. Click "Add instructions" button.');
+                    this.uiController.showLoading(false);
+                    return;
+                }
+                result = await this.apiService.generalPurpose(cvFile, jobUrl, this.currentState.additionalInstructions);
+                result.adapted_cv = result.processed_content; // Normalize the response
             } else {
                 result = await this.apiService.adaptCV(cvFile, jobUrl, this.currentState.additionalInstructions);
             }
             
             this.resultsDisplay.displayResults(result, this.currentState.actionType);
-            this.currentState.adaptedContent = result.adapted_cv || result.cover_letter;
+            this.currentState.adaptedContent = result.adapted_cv || result.cover_letter || result.processed_content;
             this.downloadManager.setCurrentCV(this.currentState.adaptedContent);
 
         } catch (error) {
