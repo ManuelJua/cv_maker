@@ -1,5 +1,3 @@
-import { MarkdownConverter } from '../utils/MarkdownConverter.js';
-
 export class ResultsDisplay {
     constructor(onContentChange) {
         this.onContentChange = onContentChange;
@@ -25,17 +23,21 @@ export class ResultsDisplay {
         }
         
         // Display the content and make it editable
-        const content = result.adapted_cv || result.cover_letter || result.processed_content;
-        cvContent.innerHTML = MarkdownConverter.markdownToHtml(content);
+        // Backend now returns HTML directly, no conversion needed
+        const htmlContent = result.adapted_cv || result.cover_letter || result.processed_content;
+        cvContent.innerHTML = htmlContent;
         cvContent.contentEditable = true;
         cvContent.setAttribute('spellcheck', 'true');
         
         this.styleEditableContent(cvContent);
         
+        // Set initial content immediately
+        this.onContentChange(htmlContent);
+        
         // Add event listener to update content when changes occur
         cvContent.addEventListener('input', () => {
-            const markdownContent = MarkdownConverter.htmlToMarkdown(cvContent.innerHTML);
-            this.onContentChange(markdownContent);
+            // Pass HTML content directly
+            this.onContentChange(cvContent.innerHTML);
         });
         
         // Display the extracted job description
@@ -55,6 +57,12 @@ export class ResultsDisplay {
         element.style.minHeight = '300px';
     }
 
+    isTitleCase(str) {
+        return str === str.replace(/\w\S*/g, (txt) => 
+            txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+        );
+    }
+
     formatJobDescription(jobDescription) {
         if (!jobDescription || jobDescription.trim() === '') {
             return '<p class="no-content">No job description available.</p>';
@@ -66,7 +74,7 @@ export class ResultsDisplay {
         paragraphs.forEach(paragraph => {
             const trimmed = paragraph.trim();
             if (trimmed) {
-                if (trimmed.length < 100 && (trimmed === trimmed.toUpperCase() || MarkdownConverter.isTitleCase(trimmed))) {
+                if (trimmed.length < 100 && (trimmed === trimmed.toUpperCase() || this.isTitleCase(trimmed))) {
                     formattedContent += `<h3>${trimmed}</h3>`;
                 } else {
                     formattedContent += `<p>${trimmed}</p>`;

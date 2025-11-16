@@ -69,28 +69,3 @@ class CVProcessor:
         except Exception as e:
             logger.error(f"Error reading TXT file: {str(e)}")
             raise
-    
-    def validate_cv_content(self, text: str) -> bool:
-        """
-        Validate that extracted text contains CV-like content.
-        
-        Args:
-            text: Extracted text from CV
-            
-        Returns:
-            bool: True if content appears to be a valid CV
-        """
-        if not text or len(text.strip()) < 100:
-            return False
-        
-        # Look for common CV sections/keywords
-        cv_indicators = [
-            'experience', 'education', 'skills', 'work', 'employment',
-            'university', 'college', 'degree', 'qualification',
-            'email', 'phone', 'address', 'linkedin'
-        ]
-        
-        text_lower = text.lower()
-        found_indicators = sum(1 for indicator in cv_indicators if indicator in text_lower)
-        
-        return found_indicators >= 3

@@ -2,36 +2,26 @@ export class DownloadManager {
     constructor(apiService, onError = null) {
         this.apiService = apiService;
         this.onError = onError;
-        this.currentAdaptedCV = null;
+        this.currentAdaptedCV = null; // This will now store HTML content
         this.initializeEventListeners();
     }
 
     initializeEventListeners() {
-        const downloadMdBtn = document.getElementById('download-md-btn');
         const downloadPdfBtn = document.getElementById('download-pdf-btn');
         const previewPdfBtn = document.getElementById('preview-pdf-btn');
 
-        downloadMdBtn.addEventListener('click', () => {
-            try {
-                this.handleDownloadMarkdown();
-            } catch (error) {
-                console.error('Error downloading markdown:', error);
-                if (this.onError) {
-                    this.onError(error.message);
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', async () => {
+                try {
+                    await this.handleDownloadPDF();
+                } catch (error) {
+                    console.error('Error downloading PDF:', error);
+                    if (this.onError) {
+                        this.onError(error.message);
+                    }
                 }
-            }
-        });
-
-        downloadPdfBtn.addEventListener('click', async () => {
-            try {
-                await this.handleDownloadPDF();
-            } catch (error) {
-                console.error('Error downloading PDF:', error);
-                if (this.onError) {
-                    this.onError(error.message);
-                }
-            }
-        });
+            });
+        }
 
         if (previewPdfBtn) {
             previewPdfBtn.addEventListener('click', async () => {
@@ -58,7 +48,9 @@ export class DownloadManager {
             // Optionally, revokeObjectURL after some time
             setTimeout(() => URL.revokeObjectURL(url), 60000);
         } catch (error) {
-            throw new Error(error.message || 'Failed to generate PDF preview. Please try again.');
+            console.error('Preview PDF error details:', error);
+            const errorMessage = error?.message || error?.detail || String(error) || 'Failed to generate PDF preview. Please try again.';
+            throw new Error(errorMessage);
         }
     }
 
@@ -69,14 +61,16 @@ export class DownloadManager {
     extractNameAndRole(cvContent) {
         if (!cvContent) return { name: 'CV', role: 'Document' };
 
-        const lines = cvContent.split('\n').filter(line => line.trim());
+        // Create a temporary element to parse HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cvContent;
         
-        let name = lines[0] ? lines[0].trim() : 'CV';
-        let role = lines[1] ? lines[1].trim() : 'Document';
-
-        // Remove markdown formatting if present
-        name = name.replace(/^#+\s*/, '').trim();
-        role = role.replace(/^#+\s*/, '').trim();
+        // Try to extract from h1 and h4 tags (based on backend formatting)
+        const h1 = tempDiv.querySelector('h1');
+        const h4 = tempDiv.querySelector('h4');
+        
+        let name = h1 ? h1.textContent.trim() : 'CV';
+        let role = h4 ? h4.textContent.trim() : 'Document';
 
         // Clean up the extracted values
         name = name.replace(/[^\w\s-]/g, '').trim();
@@ -98,15 +92,6 @@ export class DownloadManager {
         return `${cleanName}_${cleanRole}${extension}`;
     }
 
-    handleDownloadMarkdown() {
-        if (!this.currentAdaptedCV) {
-            throw new Error('No adapted CV available for download.');
-        }
-
-        const blob = new Blob([this.currentAdaptedCV], { type: 'text/markdown' });
-        this.downloadBlob(blob, this.generateFilename('.md'));
-    }
-
     async handleDownloadPDF() {
         if (!this.currentAdaptedCV) {
             throw new Error('No adapted CV available for download.');
@@ -116,7 +101,9 @@ export class DownloadManager {
             const blob = await this.apiService.convertToPDF(this.currentAdaptedCV);
             this.downloadBlob(blob, this.generateFilename('.pdf'));
         } catch (error) {
-            throw new Error(error.message || 'Failed to generate PDF. Please try again or download as markdown.');
+            console.error('Download PDF error details:', error);
+            const errorMessage = error?.message || error?.detail || String(error) || 'Failed to generate PDF. Please try again.';
+            throw new Error(errorMessage);
         }
     }
 

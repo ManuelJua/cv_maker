@@ -242,29 +242,29 @@ async def general_purpose(
         )
 
 @app.post("/api/convert-to-pdf")
-async def convert_markdown_to_pdf(
-    markdown_content: str = Form(...)
+async def convert_html_to_pdf(
+    content: str = Form(...)
 ):
     """
-    Convert markdown content to PDF.
+    Convert HTML content to PDF.
     
     Args:
-        markdown_content: CV content in markdown format
+        content: CV content in HTML format
     
     Returns:
         PDF file as bytes
     """
     try:
-        logger.info("Converting markdown to PDF")
+        logger.info("Converting HTML to PDF")
         
-        if not markdown_content.strip():
+        if not content.strip():
             raise HTTPException(
                 status_code=400,
-                detail="Markdown content cannot be empty"
+                detail="Content cannot be empty"
             )
         
-        # Generate PDF from markdown
-        pdf_bytes = pdf_generator.markdown_to_pdf(markdown_content)
+        # Generate PDF from HTML content
+        pdf_bytes = pdf_generator.html_to_pdf(content)
         
         logger.info("PDF generation completed successfully")
         

@@ -1,9 +1,5 @@
-from pydantic import BaseModel, HttpUrl
-from typing import Optional, Literal
+from pydantic import BaseModel
 
-class AdaptCVRequest(BaseModel):
-    job_url: HttpUrl
-    
 class AdaptCVResponse(BaseModel):
     adapted_cv: str
     job_description: str
@@ -24,15 +20,3 @@ class GeneralPurposeResponse(BaseModel):
     
 class ErrorResponse(BaseModel):
     detail: str
-    
-class JobDescription(BaseModel):
-    title: str
-    company: str
-    description: str
-    requirements: list[str]
-    url: str
-    
-class CVData(BaseModel):
-    raw_text: str
-    file_type: str
-    file_size: int

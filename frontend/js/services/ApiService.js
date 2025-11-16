@@ -62,20 +62,44 @@ export class ApiService {
         return await response.json();
     }
 
-    async convertToPDF(markdownContent) {
-        const formData = new FormData();
-        formData.append('markdown_content', markdownContent);
+    async convertToPDF(htmlContent) {
+        try {
+            const formData = new FormData();
+            formData.append('content', htmlContent);
 
-        const response = await fetch(`${this.baseUrl}/convert-to-pdf`, {
-            method: 'POST',
-            body: formData
-        });
+            console.log('Sending PDF conversion request...');
+            console.log('HTML content length:', htmlContent?.length);
+            console.log('HTML content preview:', htmlContent?.substring(0, 200));
+            
+            const response = await fetch(`${this.baseUrl}/convert-to-pdf`, {
+                method: 'POST',
+                body: formData
+            });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to generate PDF');
+            console.log('PDF conversion response status:', response.status);
+
+            if (!response.ok) {
+                let errorMessage = 'Failed to generate PDF';
+                try {
+                    const errorData = await response.json();
+                    console.error('PDF conversion error data:', errorData);
+                    // Handle FastAPI validation errors
+                    if (errorData.detail && Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ');
+                    } else {
+                        errorMessage = errorData.detail || errorMessage;
+                    }
+                } catch (e) {
+                    // If JSON parsing fails, use status text
+                    errorMessage = `${errorMessage}: ${response.statusText}`;
+                }
+                throw new Error(errorMessage);
+            }
+
+            return await response.blob();
+        } catch (error) {
+            console.error('convertToPDF error:', error);
+            throw error;
         }
-
-        return await response.blob();
     }
 }
