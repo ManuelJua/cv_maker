@@ -17,7 +17,7 @@ class LLMAdapter:
         self.google_api_key = os.getenv("GOOGLE_AI_API_KEY")
         if self.google_api_key:
             self.client = genai.Client(api_key=self.google_api_key)
-            self.model = "gemini-2.0-flash"
+            self.model = "gemini-3-pro-preview"
         else:
             raise ValueError("Google API key was not retrieved")
 
