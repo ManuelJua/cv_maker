@@ -26,7 +26,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://cvmakerfrontend-production.up.railway.app",
-                   "https://cvmakerfrontend-staging.up.railway.app",
+                   os.getenv("STAGING_FRONTEND_URL"),
         "http://localhost:3000"],  # for local development 
     allow_credentials=True,
     allow_methods=["*"],
